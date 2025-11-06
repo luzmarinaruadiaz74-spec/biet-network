@@ -1,6 +1,39 @@
 /** @type {import('next').NextConfig} */
+const isProd = process.env.NODE_ENV === 'production';
+const repository = 'bietnetwork.org';
+
 const nextConfig = {
   reactStrictMode: true,
+  output: 'export',
+  // For GitHub Pages deployment
+  basePath: isProd ? `/${repository}` : '',
+  assetPrefix: isProd ? `/${repository}/` : '',
+  // Ensure CSS and other static assets are properly loaded
+  images: {
+    unoptimized: true,
+  },
+  // Fix for CSS loading
+  experimental: {
+    appDir: true,
+  },
+  // Ensure static assets are properly served
+  trailingSlash: true,
+  // Add custom webpack config for asset loading
+  webpack: (config) => {
+    // Fixes npm packages that depend on `fs` module
+    config.resolve.fallback = { fs: false };
+    return config;
+  },
+  // Fix for static export
+  env: {
+    NEXT_PUBLIC_BASE_PATH: isProd ? `/${repository}` : '',
+  },
+};
+
+// For GitHub Pages
+if (isProd) {
+  nextConfig.assetPrefix = `/${repository}/`;
+  nextConfig.basePath = `/${repository}`;
 }
 
-module.exports = nextConfig
+module.exports = nextConfig;
